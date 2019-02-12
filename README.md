@@ -1,4 +1,4 @@
-# tekken-replay-system
+# TekkenReplayUtil
 A sharable replay system for Tekken 7.
 
 ## How To Use
