@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Media;
 using System.Windows.Forms;
+using System.Text;
 
 namespace TekkenReplayUtil
 {
@@ -142,8 +143,6 @@ namespace TekkenReplayUtil
            });
             fcaddr = fcresult.Result;
             moveidaddr = fcaddr - 0x1A4D0 + 0x31C;
-            ulong p1nameaddr = Reader.Default.Read<ulong>(baseAddr + 0x3419720, out _) + 0x2E8;
-            ulong p2nameaddr = Reader.Default.Read<ulong>(baseAddr + 0x341C660, out _) + 0x2E8; 
             if (args.Length == 0) {
                 ulong newasm = Allocator.Default.AllocateMemory(0x800);
                 ulong bufarray = Allocator.Default.AllocateMemory(0x20000);
@@ -172,12 +171,16 @@ namespace TekkenReplayUtil
                 Console.WriteLine("Hooking");
                 Writer.Default.WriteBytes(newasm, hookbytes);
                 Writer.Default.WriteBytes(bufferhook, jmpbytes);
+                ulong p1nameaddr = Reader.Default.Read<ulong>(baseAddr + 0x3419720, out _) + 0x2E8;
+                ulong p2nameaddr = Reader.Default.Read<ulong>(baseAddr + 0x341C660, out _) + 0x2E8;
                 var stalecount = 0;
                 var fc = Reader.Default.Read<UInt32>(fcaddr, out _);
                 UInt32 nfc;
                 bool success = true;
-                string p1name = Reader.Default.Read<string>(p1nameaddr, out _);
-                string p2name = Reader.Default.Read<string>(p2nameaddr, out _);
+                byte[] p1namearr = Reader.Default.ReadBytes(p1nameaddr, 16, out _).TakeWhile(character => character != 0).ToArray();
+                byte[] p2namearr = Reader.Default.ReadBytes(p2nameaddr, 16, out _).TakeWhile(character => character != 0).ToArray();
+                string p1name = Encoding.ASCII.GetString(p1namearr);
+                string p2name = Encoding.ASCII.GetString(p2namearr);
                 while (stalecount < 400 && success)
                 {
                     nfc = Reader.Default.Read<UInt32>(fcaddr, out success);
