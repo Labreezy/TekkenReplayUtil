@@ -211,7 +211,7 @@ namespace TekkenReplayUtil
             {
                 ulong newasm = Allocator.Default.AllocateMemory(0x800);
                 ulong bufarray = Allocator.Default.AllocateMemory(0x20000);
-                byte[] replay = File.ReadAllBytes(args[1]);
+                byte[] replay = File.ReadAllBytes(args[0]);
                 Writer.Default.WriteBytes(bufarray, replay);
                 Writer.Default.Write<Int32>(bufarray + 0x18000, replay.Length);
                 ulong stoploc = bufarray + 0x18080;
@@ -227,10 +227,10 @@ namespace TekkenReplayUtil
                 byte[] hookbytesafter = assemble64(
                     "sub r13d, dword [rdx]" +
                     "\r\nadd dword [rdx], 2" +
-                    "\r\nmov r8d, [r13+0xB000]" +
+                    "\r\nmov r8d, [r13+0x18000]" +
                     "\r\ncmp dword [rdx], r8d" +
                     "\r\njl backtocode" +
-                    "\r\nmov byte [r13+0xB080], 1" +
+                    "\r\nmov byte [r13+0x18080], 1" +
                     "\r\nbacktocode:" +
                     "\r\nxor r13, r13" +
                     "\r\nmov r8, 0x" + (bufferhook + 10).ToString("X") +
