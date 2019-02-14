@@ -153,9 +153,15 @@ namespace TekkenReplayUtil
                 byte[] hookbytes = assemble64(
                     "mov r13, 0x" + bufarray.ToString("X") +
                     "\r\nmov rdx, 0x" + (newasm + 0x7F8).ToString("X") +
+                    "\r\ncmp dword [rdx], 0" +
+                    "\r\njne write" +
+                    "\r\ncmp rax, 1" +
+                    "\r\nje backtocode" +
+                    "\r\nwrite:" +
                     "\r\nadd r13d, dword [rdx]" +
                     "\r\nmov [r13], r8w" +
                     "\r\nadd dword [rdx], 2" +
+                    "\r\nbacktocode:" +
                     "\r\nxor r13, r13");
                     byte[] jmpbackbytes = assemble64("mov r8, 0x" + (bufferhook + 10).ToString("X") +
                     "\r\njmp r8");
@@ -220,14 +226,20 @@ namespace TekkenReplayUtil
                 byte[] originalcode = Reader.Default.ReadBytes(bufferhook, 10, out _);
                 byte[] jmpbytes = assemble64("mov r13, 0x" + newasm.ToString("X") +
                 "\r\njmp r13\r\nnop");
-                byte[] hookbytesbefore = assemble64(
+                byte[] hookbytes = assemble64(
                     "mov r13, 0x" + bufarray.ToString("X") +
-                    "\r\nmov rdx, 0x" + (newasm + 0x7FC).ToString("X") +
+                    "\r\nmov rdx, 0x" + (newasm + 0x7F8).ToString("X") +
+                    "\r\ncmp dword [rdx], 0" +
+                    "\r\njne write" +
+                    "\r\ncmp rax, 1" +
+                    "\r\nje backtocode" +
+                    "\r\nwrite:" +
                     "\r\nadd r13d, dword [rdx]" +
                     "\r\nmov r8w, word [r13]" +
-                    "\r\nmov r9w, word [r13]");
-                byte[] hookbytesafter = assemble64(
-                    "sub r13d, dword [rdx]" +
+                    "\r\nmov r9w, word [r13]" +
+                    "\r\nmov dword [rcx + rax*4 + 0x20], r8d" +
+                    "\r\nmov dword [rcx + rax*4 + 0x28], r9d" +
+                    "\r\nsub r13d, dword [rdx]" +
                     "\r\nadd dword [rdx], 2" +
                     "\r\nmov r8d, [r13+0x18000]" +
                     "\r\ncmp dword [rdx], r8d" +
@@ -238,7 +250,6 @@ namespace TekkenReplayUtil
                     "\r\nmov r8, 0x" + (bufferhook + 10).ToString("X") +
                     "\r\njmp r8"
                     );
-                byte[] hookbytes = hookbytesbefore.Concat(originalcode).Concat(hookbytesafter).ToArray();
                 while (Reader.Default.Read<UInt32>(fcaddr, out _) != 0)
                 {
                     Thread.Sleep(1);
