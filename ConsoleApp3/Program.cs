@@ -143,6 +143,7 @@ namespace TekkenReplayUtil
            });
             fcaddr = fcresult.Result;
             moveidaddr = fcaddr - 0x1A4D0 + 0x31C;
+            var movetimeraddr = moveidaddr - 0x31C + 0x1F0;
             if (args.Length == 0) {
                 ulong newasm = Allocator.Default.AllocateMemory(0x800);
                 ulong bufarray = Allocator.Default.AllocateMemory(0x20000);
@@ -163,7 +164,7 @@ namespace TekkenReplayUtil
                 {
                     Thread.Sleep(1);
                 }
-                while(Reader.Default.Read<UInt32>(moveidaddr, out _) != 32769)
+                while(Reader.Default.Read<UInt32>(moveidaddr, out _) != 32769 && Reader.Default.Read<UInt32>(movetimeraddr, out _) != 10)
                 {
                     Thread.Sleep(1);
                 }
@@ -197,6 +198,7 @@ namespace TekkenReplayUtil
                     fc = nfc;
                 }
                 Writer.Default.WriteBytes(bufferhook, originalcode);
+                SystemSounds.Beep.Play();
                 var recordingLength = Reader.Default.Read<Int32>(newasm + 0x7F8, out _);
                 Allocator.Default.DeallocateMemory(newasm);
                 byte[] recording = Reader.Default.ReadBytes(bufarray, recordingLength, out _);
@@ -241,7 +243,7 @@ namespace TekkenReplayUtil
                 {
                     Thread.Sleep(1);
                 }
-                while (Reader.Default.Read<UInt32>(moveidaddr, out _) != 32769)
+                while (Reader.Default.Read<UInt32>(moveidaddr, out _) != 32769 && Reader.Default.Read<UInt32>(movetimeraddr, out _) != 10)
                 {
                     Thread.Sleep(1);
                 }
@@ -252,7 +254,7 @@ namespace TekkenReplayUtil
                 var stalecount = 0;
                 var fc = Reader.Default.Read<UInt32>(fcaddr, out _);
                 UInt32 nfc;
-                while (stalecount < 400 && Reader.Default.Read<byte>(bufarray + 0xB080, out _) == 0)
+                while (stalecount < 400 && Reader.Default.Read<byte>(bufarray + 0x18080, out _) == 0)
                 {
                     nfc = Reader.Default.Read<UInt32>(fcaddr, out _);
                     if (nfc == fc && nfc != 0)
