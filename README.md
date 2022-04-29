@@ -1,6 +1,8 @@
 # tekken-replay-system
 A sharable replay system for Tekken 7.
 
+THIS ISN'T USEFUL ANYMORE WHATSOEVER, THANK HARADA FOR GIVING YOU STABLE REPLAYS
+
 ## How To Use
 
 ### Recording
